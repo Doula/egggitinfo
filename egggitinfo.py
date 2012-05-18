@@ -10,7 +10,7 @@ _TEMPLATE = """\
 """
 
 def write_git_info(cmd, basename, filename):
-    try
+    try:
         repo = Repo('.')
     except InvalidGitRepositoryError, e:
         return
