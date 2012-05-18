@@ -1,28 +1,28 @@
-"""setuptools entry point to capture test info in the .egg-info directory
-
-After installing this egg, rerun 'setup.py egg_info' to get the new file
-written into the .egg-info directory of your checkouts.
-"""
+from git.exc import InvalidGitRepositoryError
+from git import Repo
 from pkg_resources import yield_lines
 
 _TEMPLATE = """\
-test_module = %s
-test_suite = %s
-test_loader = %s
-tests_require = %s
+{
+    git_branch = "%s",
+    git_remotes = ["%s"]
+}
 """
 
-def write_test_info(cmd, basename, filename):
-    import pdb;pdb.set_trace()
-    dist = cmd.distribution
-    test_module = getattr(dist, 'test_module', '')
-    test_suite = getattr(dist, 'test_suite', '')
-    test_loader = getattr(dist, 'test_loader', '')
-    tests_require = '\n   '.join(
-        yield_lines(getattr(dist, 'tests_require', '') or ()))
-    cmd.write_or_delete_file("test_info", filename,
-                             _TEMPLATE % (test_module,
-                                          test_suite,
-                                          test_loader,
-                                          tests_require,
-                                         ))
+def write_git_info(cmd, basename, filename):
+    try
+        repo = Repo('.')
+    except InvalidGitRepositoryError, e:
+        return
+
+    # Branch Name
+    branch = repo.active_branch
+    git_branch = branch.name
+    
+    # Branch Remotes
+    git_remotes_list = [remote.name for remote in repo.remotes]
+    git_remotes = '", "'.join(git_remotes_list)
+
+    cmd.write_or_delete_file("git_info", filename,
+                         _TEMPLATE % (git_branch,
+                                      git_remotes))
