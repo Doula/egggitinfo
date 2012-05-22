@@ -8,7 +8,7 @@ README = open(os.path.join(here, 'README')).read()
 requires = ['gitpython']
 
 setup(name='egggitinfo',
-      version='0.0',
+      version='0.1',
       description='Plants some git-related data into the .egg-info directory of a python package.',
       long_description=README,
       author='',
