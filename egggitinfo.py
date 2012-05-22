@@ -5,7 +5,7 @@ from pkg_resources import yield_lines
 _TEMPLATE = """\
 {
     "git_branch" : "%s",
-    "git_remotes" : [%s]
+    "git_remotes" : %s
 }
 """
 
