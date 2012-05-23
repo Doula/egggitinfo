@@ -35,7 +35,6 @@ def write_git_info(cmd, basename, filename):
 
     # Check if the current dir is a repo
     if os.path.isdir('.git'):
-        import pdb;pdb.set_trace()
         # Get branch
         output = check_output(['git', 'branch'])
         branches = output.split('\n')
