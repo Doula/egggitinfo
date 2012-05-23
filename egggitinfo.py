@@ -10,17 +10,34 @@ _TEMPLATE = """\
 }
 """
 
+def check_output(*popenargs, **kwargs):
+    """
+    Pulled from the stdlib
+    """
+    if 'stdout' in kwargs:
+         raise ValueError('stdout argument not allowed, it will be overridden.')
+    process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+    output, unused_err = process.communicate()
+    retcode = process.poll()
+    if retcode:
+        cmd = kwargs.get("args")
+        if cmd is None:
+            cmd = popenargs[0]
+        raise subprocess.CalledProcessError(retcode, cmd, output=output)
+    return output
+
 def write_git_info(cmd, basename, filename):
     # Check if git is installed
     try:
-        output = subprocess.check_output(['which', 'git'])
+        output = check_output(['which', 'git'])
     except subprocess.CalledProcessError:
         return
 
     # Check if the current dir is a repo
     if os.path.isdir('.git'):
+        import pdb;pdb.set_trace()
         # Get branch
-        output = subprocess.check_output(['git', 'branch'])
+        output = check_output(['git', 'branch'])
         branches = output.split('\n')
         
         git_branch = None
@@ -30,7 +47,7 @@ def write_git_info(cmd, basename, filename):
                 break
 
         # Get remotes
-        output = subprocess.check_output(['git', 'remote', '-v'])
+        output = check_output(['git', 'remote', '-v'])
         remotes = output.split('\n')
 
         git_remotes = {}
