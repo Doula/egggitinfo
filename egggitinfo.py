@@ -45,7 +45,6 @@ def write_git_info(cmd, basename, filename):
             else:
                 continue
 
-        import pdb;pdb.set_trace()
         if git_remotes and git_branch:
             cmd.write_or_delete_file("git_info", filename,
                                     _TEMPLATE % (git_branch,
