@@ -1,5 +1,6 @@
-from git.exc import InvalidGitRepositoryError
-from git import Repo
+import subprocess
+import os.path
+import re
 from pkg_resources import yield_lines
 
 _TEMPLATE = """\
@@ -10,20 +11,44 @@ _TEMPLATE = """\
 """
 
 def write_git_info(cmd, basename, filename):
+    # Check if git is installed
     try:
-        repo = Repo('.')
-    except InvalidGitRepositoryError, e:
+        output = subprocess.check_output(['which', 'git'])
+    except subprocess.CalledProcessError:
         return
 
-    # Branch Name
-    branch = repo.active_branch
-    git_branch = branch.name
-    
-    # Branch Remotes
-    git_remotes_list = ['{ "%s" : "%s" }' % \
-                        (remote.name, remote.url) for remote in repo.remotes]
-    git_remotes = ', '.join(git_remotes_list)
+    # Check if the current dir is a repo
+    if os.path.isdir('.git'):
+        # Get branch
+        output = subprocess.check_output(['git', 'branch'])
+        branches = output.split('\n')
+        
+        git_branch = None
+        for branch in branches:
+            if '* ' in branch:
+                git_branch = branch.replace('* ', '')
+                break
 
-    cmd.write_or_delete_file("git_info", filename,
-                         _TEMPLATE % (git_branch,
-                                      git_remotes))
+        # Get remotes
+        output = subprocess.check_output(['git', 'remote', '-v'])
+        remotes = output.split('\n')
+
+        git_remotes = {}
+        for remote in remotes:
+            remote = remote.replace('\t', ' ')
+            remote_info = remote.split(' ') 
+
+            if len(remote_info) == 3:
+                name = remote_info[0]
+                url = remote_info[1]
+                git_remotes[name] = url
+            else:
+                continue
+
+        import pdb;pdb.set_trace()
+        if git_remotes and git_branch:
+            cmd.write_or_delete_file("git_info", filename,
+                                    _TEMPLATE % (git_branch,
+                                                 git_remotes))
+        else:
+            return
