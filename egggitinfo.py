@@ -50,8 +50,9 @@ def write_git_info(cmd, basename, filename):
         remotes = output.split('\n')
 
         git_remotes = {}
+
         for remote in remotes:
-            remote = remote.replace('\t', ' ')
+            remote = re.sub(r'\s+', ' ', remote)
             remote_info = remote.split(' ') 
 
             if len(remote_info) == 3:
